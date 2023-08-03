@@ -395,10 +395,7 @@ impl<T: Config<I>, I: 'static> fungibles::UnbalancedHold<T::AccountId> for Palle
 			Account::<T, I>::insert(&asset, &who, new_account);
 		}
 
-		/* 		debug_assert!(
-			maybe_dust.is_none(),
-			"Does not alter main balance; dust only happens when it is altered; qed"
-		); */
+		/// Here the balance pallet calls try_mutate_account that calculates then dust. We should do something similar.
 		Holds::<T, I>::insert(who, asset, holds);
 		Ok(())
 	}
