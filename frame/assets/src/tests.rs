@@ -24,7 +24,7 @@ use frame_support::{
 	dispatch::GetDispatchInfo,
 	traits::{
 		fungibles::InspectEnumerable,
-		tokens::{Precision::Exact, Preservation::Protect},
+		tokens::{Fortitude::Polite, Precision::Exact, Preservation::Protect},
 		Currency,
 	},
 };
@@ -1786,64 +1786,105 @@ fn unbalanced_trait_set_balance_works() {
 		let asset = 0;
 		assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset, 1, false, 1));
 		let admin = 1;
-		let receiver = 2; // account with own deposit
+		let dest = 2; // account with own deposit
 		Balances::make_free_balance_be(&admin, 100);
-		Balances::make_free_balance_be(&receiver, 100);
+		Balances::make_free_balance_be(&dest, 100);
 
-		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &receiver), 0);
-		assert_ok!(Assets::mint(RuntimeOrigin::signed(1), asset, receiver, 100));
-		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &receiver), 100);
+		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &dest), 0);
+		assert_ok!(Assets::mint(RuntimeOrigin::signed(1), asset, dest, 100));
+		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &dest), 100);
 
-		assert_ok!(<Assets as fungibles::MutateHold<_>>::hold(asset, &TestId::Foo, &receiver, 60));
-		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &receiver), 40);
+		assert_ok!(<Assets as fungibles::MutateHold<_>>::hold(asset, &TestId::Foo, &dest, 60));
+		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &dest), 40);
+		assert_eq!(<Assets as fungibles::InspectHold<_>>::total_balance_on_hold(asset, &dest), 60);
 		assert_eq!(
-			<Assets as fungibles::InspectHold<_>>::total_balance_on_hold(asset, &receiver),
-			60
-		);
-		assert_eq!(
-			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &receiver),
+			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &dest),
 			60
 		);
 
 		assert_eq!(
-			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &receiver),
+			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &dest),
 			60
 		);
 
 		assert_ok!(<Assets as fungibles::MutateHold<_>>::release(
 			asset,
 			&TestId::Foo,
-			&receiver,
+			&dest,
 			30,
 			Exact
 		));
 
 		assert_eq!(
-			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &receiver),
+			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &dest),
 			30
 		);
-		assert_eq!(
-			<Assets as fungibles::InspectHold<_>>::total_balance_on_hold(asset, &receiver),
-			30
-		);
+		assert_eq!(<Assets as fungibles::InspectHold<_>>::total_balance_on_hold(asset, &dest), 30);
 
 		assert_ok!(<Assets as fungibles::MutateHold<_>>::release(
 			asset,
 			&TestId::Foo,
-			&receiver,
+			&dest,
 			30,
 			Exact
 		));
 
 		assert_eq!(
-			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &receiver),
+			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &dest),
 			0
 		);
-		assert_eq!(
-			<Assets as fungibles::InspectHold<_>>::total_balance_on_hold(asset, &receiver),
-			0
-		);
-		let holds = Holds::<Test>::get(&receiver, asset);
+		assert_eq!(<Assets as fungibles::InspectHold<_>>::total_balance_on_hold(asset, &dest), 0);
+		let holds = Holds::<Test>::get(&dest, asset);
 		assert_eq!(holds.len(), 0);
+	});
+}
+
+#[test]
+fn transfer_and_hold_works() {
+	new_test_ext().execute_with(|| {
+		let asset = 0;
+		let admin = 1;
+		let source = 2; // account with own deposit
+		let dest = 3; // account with own deposit
+		assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset, admin, true, 1));
+
+		Balances::make_free_balance_be(&admin, 100);
+		Balances::make_free_balance_be(&source, 100);
+
+		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &source), 0);
+		assert_ok!(Assets::mint(RuntimeOrigin::signed(1), asset, source, 100));
+
+		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &source), 100);
+
+		assert_ok!(<Assets as fungibles::MutateHold<_>>::transfer_and_hold(
+			asset,
+			&TestId::Foo,
+			&source,
+			&dest,
+			60,
+			Exact,
+			Protect,
+			Polite
+		));
+
+		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &source), 40);
+		assert_eq!(
+			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &dest),
+			60
+		);
+		assert_eq!(<Assets as fungibles::InspectHold<_>>::total_balance_on_hold(asset, &dest), 60);
+
+		assert_ok!(<Assets as fungibles::MutateHold<_>>::release(
+			asset,
+			&TestId::Foo,
+			&dest,
+			20,
+			Exact
+		));
+		assert_eq!(
+			<Assets as fungibles::InspectHold<_>>::balance_on_hold(asset, &TestId::Foo, &dest),
+			40
+		);
+		assert_eq!(<Assets as fungibles::Inspect<_>>::balance(asset, &dest), 20);
 	});
 }

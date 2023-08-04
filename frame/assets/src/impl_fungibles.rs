@@ -345,10 +345,16 @@ impl<T: Config<I>, I: 'static> fungibles::InspectHold<T::AccountId> for Pallet<T
 			.map_or_else(Zero::zero, |x| x.amount)
 	}
 	fn hold_available(asset: T::AssetId, reason: &Self::Reason, who: &T::AccountId) -> bool {
+		let asset_details = Asset::<T, I>::get(asset.clone()).unwrap();
+		let holds = Holds::<T, I>::get(who, asset);
+		if !holds.is_full() && asset_details.is_sufficient == true {
+			return true;
+		}
+
 		if frame_system::Pallet::<T>::providers(who) == 0 {
 			return false;
 		}
-		let holds = Holds::<T, I>::get(who, asset);
+
 		if holds.is_full() && !holds.iter().any(|x| &x.id == reason) {
 			return false;
 		}
@@ -384,14 +390,13 @@ impl<T: Config<I>, I: 'static> fungibles::UnbalancedHold<T::AccountId> for Palle
 			}
 		}
 
-		println!("holds: {:?}", holds);
-
 		let account: Option<AssetAccountOf<T, I>> = Account::<T, I>::get(&asset, &who);
+
 		if let None = account {
 			let mut details = Asset::<T, I>::get(&asset).ok_or(Error::<T, I>::Unknown)?;
 			let new_account = AssetAccountOf::<T, I> {
 				balance: Zero::zero(),
-				status: AccountStatus::Blocked,
+				status: AccountStatus::Liquid,
 				reason: Self::new_account(who, &mut details, None)?,
 				extra: T::Extra::default(),
 			};
