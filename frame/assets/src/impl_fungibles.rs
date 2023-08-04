@@ -368,12 +368,13 @@ impl<T: Config<I>, I: 'static> fungibles::UnbalancedHold<T::AccountId> for Palle
 		if let Some(item) = holds.iter_mut().find(|x| &x.id == reason) {
 			let delta = item.amount.max(amount) - item.amount.min(amount);
 			let increase = amount > item.amount;
-			item.amount = amount;
+
 			if increase {
-				item.amount.checked_add(&delta).ok_or(ArithmeticError::Overflow)?
+				item.amount = item.amount.checked_add(&delta).ok_or(ArithmeticError::Overflow)?
 			} else {
-				item.amount.checked_sub(&delta).ok_or(ArithmeticError::Underflow)?
+				item.amount = item.amount.checked_sub(&delta).ok_or(ArithmeticError::Underflow)?
 			};
+
 			holds.retain(|x| !x.amount.is_zero());
 		} else {
 			if !amount.is_zero() {
@@ -382,6 +383,8 @@ impl<T: Config<I>, I: 'static> fungibles::UnbalancedHold<T::AccountId> for Palle
 					.map_err(|_| Error::<T, I>::TooManyHolds)?;
 			}
 		}
+
+		println!("holds: {:?}", holds);
 
 		let account: Option<AssetAccountOf<T, I>> = Account::<T, I>::get(&asset, &who);
 		if let None = account {
@@ -395,7 +398,7 @@ impl<T: Config<I>, I: 'static> fungibles::UnbalancedHold<T::AccountId> for Palle
 			Account::<T, I>::insert(&asset, &who, new_account);
 		}
 
-		/// Here the balance pallet calls try_mutate_account that calculates then dust. We should do something similar.
+		// Here the balance pallet calls try_mutate_account that calculates then dust. We should do something similar.
 		Holds::<T, I>::insert(who, asset, holds);
 		Ok(())
 	}
