@@ -19,7 +19,7 @@
 
 use super::*;
 use crate as pallet_asset_conversion;
-
+use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
 	construct_runtime,
 	instances::{Instance1, Instance2},
@@ -32,7 +32,7 @@ use sp_arithmetic::Permill;
 use sp_core::H256;
 use sp_runtime::{
 	traits::{AccountIdConversion, BlakeTwo256, IdentityLookup},
-	BuildStorage,
+	BuildStorage, RuntimeDebug,
 };
 
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -90,6 +90,25 @@ impl pallet_balances::Config for Test {
 	type MaxHolds = ();
 }
 
+#[derive(
+	Encode,
+	Decode,
+	Copy,
+	Clone,
+	Eq,
+	PartialEq,
+	Ord,
+	PartialOrd,
+	MaxEncodedLen,
+	scale_info::TypeInfo,
+	RuntimeDebug,
+)]
+pub enum TestId {
+	Foo,
+	Bar,
+	Baz,
+}
+
 impl pallet_assets::Config<Instance1> for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
@@ -109,6 +128,8 @@ impl pallet_assets::Config<Instance1> for Test {
 	type Extra = ();
 	type WeightInfo = ();
 	type CallbackHandle = ();
+	type MaxHolds = ConstU32<500>;
+	type RuntimeHoldReason = TestId;
 	pallet_assets::runtime_benchmarks_enabled! {
 		type BenchmarkHelper = ();
 	}
@@ -134,6 +155,8 @@ impl pallet_assets::Config<Instance2> for Test {
 	type Extra = ();
 	type WeightInfo = ();
 	type CallbackHandle = ();
+	type MaxHolds = ConstU32<500>;
+	type RuntimeHoldReason = TestId;
 	pallet_assets::runtime_benchmarks_enabled! {
 		type BenchmarkHelper = ();
 	}

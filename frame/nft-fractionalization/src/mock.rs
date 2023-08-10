@@ -19,11 +19,11 @@
 
 use super::*;
 use crate as pallet_nft_fractionalization;
-
+use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
 	construct_runtime, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU32, ConstU64},
-	BoundedVec, PalletId,
+	BoundedVec, PalletId, RuntimeDebug,
 };
 use frame_system::EnsureSigned;
 use pallet_nfts::PalletFeatures;
@@ -37,6 +37,25 @@ type Block = frame_system::mocking::MockBlock<Test>;
 type Signature = MultiSignature;
 type AccountPublic = <Signature as Verify>::Signer;
 type AccountId = <AccountPublic as IdentifyAccount>::AccountId;
+
+#[derive(
+	Encode,
+	Decode,
+	Copy,
+	Clone,
+	Eq,
+	PartialEq,
+	Ord,
+	PartialOrd,
+	MaxEncodedLen,
+	scale_info::TypeInfo,
+	RuntimeDebug,
+)]
+pub enum TestId {
+	Foo,
+	Bar,
+	Baz,
+}
 
 // Configure a mock runtime to test the pallet.
 construct_runtime!(
@@ -110,6 +129,8 @@ impl pallet_assets::Config for Test {
 	type Extra = ();
 	type CallbackHandle = ();
 	type WeightInfo = ();
+	type MaxHolds = ConstU32<500>;
+	type RuntimeHoldReason = TestId;
 	pallet_assets::runtime_benchmarks_enabled! {
 		type BenchmarkHelper = ();
 	}
