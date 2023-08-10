@@ -1491,6 +1491,23 @@ impl pallet_lottery::Config for Runtime {
 	type WeightInfo = pallet_lottery::weights::SubstrateWeight<Runtime>;
 }
 
+#[derive(
+	Encode,
+	Decode,
+	Copy,
+	Clone,
+	Eq,
+	PartialEq,
+	Ord,
+	PartialOrd,
+	MaxEncodedLen,
+	scale_info::TypeInfo,
+	RuntimeDebug,
+)]
+pub enum AssetRuntimeHoldReasons {
+	TransferHold,
+}
+
 parameter_types! {
 	pub const AssetDeposit: Balance = 100 * DOLLARS;
 	pub const ApprovalDeposit: Balance = 1 * DOLLARS;
@@ -1518,6 +1535,8 @@ impl pallet_assets::Config<Instance1> for Runtime {
 	type CallbackHandle = ();
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 	type RemoveItemsLimit = ConstU32<1000>;
+	type MaxHolds = ConstU32<500>;
+	type RuntimeHoldReason = AssetRuntimeHoldReasons;
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
 }
@@ -1545,6 +1564,8 @@ impl pallet_assets::Config<Instance2> for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 	type RemoveItemsLimit = ConstU32<1000>;
 	type CallbackHandle = ();
+	type MaxHolds = ConstU32<500>;
+	type RuntimeHoldReason = AssetRuntimeHoldReasons;
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
 }

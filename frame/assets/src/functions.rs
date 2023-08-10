@@ -132,9 +132,11 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 			Some(details) => details,
 			None => return DepositConsequence::UnknownAsset,
 		};
+
 		if increase_supply && details.supply.checked_add(&amount).is_none() {
 			return DepositConsequence::Overflow
 		}
+
 		if let Some(account) = Account::<T, I>::get(id, who) {
 			if account.status.is_blocked() {
 				return DepositConsequence::Blocked

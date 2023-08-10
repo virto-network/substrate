@@ -87,6 +87,15 @@ pub struct Approval<Balance, DepositBalance> {
 	pub(super) deposit: DepositBalance,
 }
 
+/// An identifier and balance.
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
+pub struct IdAmount<Id, Balance> {
+	/// An identifier for this item.
+	pub id: Id,
+	/// Some amount for this item.
+	pub amount: Balance,
+}
+
 #[test]
 fn ensure_bool_decodes_to_consumer_or_sufficient() {
 	assert_eq!(false.encode(), ExistenceReason::<(), ()>::Consumer.encode());
