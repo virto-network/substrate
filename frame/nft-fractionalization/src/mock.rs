@@ -38,25 +38,6 @@ type Signature = MultiSignature;
 type AccountPublic = <Signature as Verify>::Signer;
 type AccountId = <AccountPublic as IdentifyAccount>::AccountId;
 
-#[derive(
-	Encode,
-	Decode,
-	Copy,
-	Clone,
-	Eq,
-	PartialEq,
-	Ord,
-	PartialOrd,
-	MaxEncodedLen,
-	scale_info::TypeInfo,
-	RuntimeDebug,
-)]
-pub enum TestId {
-	Foo,
-	Bar,
-	Baz,
-}
-
 // Configure a mock runtime to test the pallet.
 construct_runtime!(
 	pub enum Test
@@ -130,7 +111,7 @@ impl pallet_assets::Config for Test {
 	type CallbackHandle = ();
 	type WeightInfo = ();
 	type MaxHolds = ConstU32<500>;
-	type RuntimeHoldReason = TestId;
+	type RuntimeHoldReason = RuntimeHoldReason;
 	pallet_assets::runtime_benchmarks_enabled! {
 		type BenchmarkHelper = ();
 	}

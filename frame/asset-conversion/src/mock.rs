@@ -90,25 +90,6 @@ impl pallet_balances::Config for Test {
 	type MaxHolds = ();
 }
 
-#[derive(
-	Encode,
-	Decode,
-	Copy,
-	Clone,
-	Eq,
-	PartialEq,
-	Ord,
-	PartialOrd,
-	MaxEncodedLen,
-	scale_info::TypeInfo,
-	RuntimeDebug,
-)]
-pub enum TestId {
-	Foo,
-	Bar,
-	Baz,
-}
-
 impl pallet_assets::Config<Instance1> for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
@@ -129,7 +110,7 @@ impl pallet_assets::Config<Instance1> for Test {
 	type WeightInfo = ();
 	type CallbackHandle = ();
 	type MaxHolds = ConstU32<500>;
-	type RuntimeHoldReason = TestId;
+	type RuntimeHoldReason = RuntimeHoldReason;
 	pallet_assets::runtime_benchmarks_enabled! {
 		type BenchmarkHelper = ();
 	}
@@ -156,7 +137,7 @@ impl pallet_assets::Config<Instance2> for Test {
 	type WeightInfo = ();
 	type CallbackHandle = ();
 	type MaxHolds = ConstU32<500>;
-	type RuntimeHoldReason = TestId;
+	type RuntimeHoldReason = RuntimeHoldReason;
 	pallet_assets::runtime_benchmarks_enabled! {
 		type BenchmarkHelper = ();
 	}

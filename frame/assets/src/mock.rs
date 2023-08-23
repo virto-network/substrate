@@ -132,25 +132,6 @@ impl AssetsCallbackHandle {
 	}
 }
 
-#[derive(
-	Encode,
-	Decode,
-	Copy,
-	Clone,
-	Eq,
-	PartialEq,
-	Ord,
-	PartialOrd,
-	MaxEncodedLen,
-	scale_info::TypeInfo,
-	RuntimeDebug,
-)]
-pub enum TestId {
-	Foo,
-	Bar,
-	Baz,
-}
-
 impl Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u64;
@@ -171,7 +152,7 @@ impl Config for Test {
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
 	type MaxHolds = ConstU32<500>;
-	type RuntimeHoldReason = TestId;
+	type RuntimeHoldReason = RuntimeHoldReason;
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
 }

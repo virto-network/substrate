@@ -281,7 +281,7 @@ pub mod pallet {
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
 		/// The overarching hold reason.
-		type RuntimeHoldReason: Parameter + Member + MaxEncodedLen + Ord + Copy;
+		type RuntimeHoldReason: From<HoldReason>;
 
 		/// The basic amount of funds that must be reserved for an asset.
 		#[pallet::constant]
@@ -329,6 +329,12 @@ pub mod pallet {
 		/// Helper trait for benchmarks.
 		#[cfg(feature = "runtime-benchmarks")]
 		type BenchmarkHelper: BenchmarkHelper<Self::AssetIdParameter>;
+	}
+
+	#[pallet::composite_enum]
+	pub enum HoldReason {
+		#[codec(index = 0)]
+		Transfer,
 	}
 
 	#[pallet::storage]
@@ -1092,7 +1098,7 @@ pub mod pallet {
 				ensure!(details.status == AssetStatus::Live, Error::<T, I>::LiveAsset);
 				ensure!(origin == details.owner, Error::<T, I>::NoPermission);
 				if details.owner == owner {
-					return Ok(())
+					return Ok(());
 				}
 
 				let metadata_deposit = Metadata::<T, I>::get(&id).deposit;

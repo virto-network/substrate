@@ -41,25 +41,6 @@ type Block = frame_system::mocking::MockBlock<Runtime>;
 type Balance = u64;
 type AccountId = u64;
 
-#[derive(
-	Encode,
-	Decode,
-	Copy,
-	Clone,
-	Eq,
-	PartialEq,
-	Ord,
-	PartialOrd,
-	MaxEncodedLen,
-	scale_info::TypeInfo,
-	RuntimeDebug,
-)]
-pub enum TestId {
-	Foo,
-	Bar,
-	Baz,
-}
-
 frame_support::construct_runtime!(
 	pub enum Runtime
 	{
@@ -211,7 +192,7 @@ impl pallet_assets::Config for Runtime {
 	type WeightInfo = ();
 	type RemoveItemsLimit = ConstU32<1000>;
 	type MaxHolds = ConstU32<500>;
-	type RuntimeHoldReason = TestId;
+	type RuntimeHoldReason = RuntimeHoldReason;
 	pallet_assets::runtime_benchmarks_enabled! {
 		type BenchmarkHelper = ();
 	}
@@ -237,7 +218,7 @@ impl pallet_assets::Config<Instance2> for Runtime {
 	type WeightInfo = ();
 	type CallbackHandle = ();
 	type MaxHolds = ConstU32<500>;
-	type RuntimeHoldReason = TestId;
+	type RuntimeHoldReason = RuntimeHoldReason;
 	pallet_assets::runtime_benchmarks_enabled! {
 		type BenchmarkHelper = ();
 	}
